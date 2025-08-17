@@ -3,6 +3,7 @@ Version: 0.2.0
 Date: 16. 08. 2025
   Changes:
     - Ported to Factorio 2.0
+    - Merged Basic Robots Requester Chest mod by cHL
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.1
 Date: 03. 03. 2021

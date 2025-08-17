@@ -221,6 +221,73 @@ if settings.startup["basic-robots-enable-roboport"].value or settings.startup["b
     }}
 end
 
+-- Requester chest by cHL
+e = table.deepcopy(data.raw["container"]["iron-chest"])
+  e.type = "logistic-container"
+  e.name = "basic-robots-logistic-chest-requester"
+  e.icons = {{icon = e.icon, tint = {0.5, 0.5, 1}}}
+  e.icon = nil
+  e.minable.result = e.name
+  e.logistic_mode = "requester"
+  e.next_upgrade = "logistic-chest-requester"
+  e.inventory_size = 16
+  e.trash_inventory_size = 5
+  e.picture.layers[1].tint= {0.5, 0.5, 1}
+  --e.picture.layers[1].hr_version.tint= {0.5, 0.5, 1}
+
+  data:extend{e,
+    {
+      type = "item",
+      name = "basic-robots-logistic-chest-requester",
+      icons = {{
+        icon = "__base__/graphics/icons/iron-chest.png",
+        tint = {0.5, 0.5, 1}
+      }},
+      icon_size = 64, icon_mipmaps = 4,
+      subgroup = "logistic-network",
+      order = "b[storage]-c[logistic-chest-requester]",
+      place_result = "basic-robots-logistic-chest-requester",
+      stack_size = 50
+    },
+    {
+      type = "recipe",
+      name = "basic-robots-logistic-chest-requester",
+      enabled = false,
+      ingredients =
+      {
+        {type = "item", name = "iron-chest", amount = 1, },
+        {type = "item", name = "iron-gear-wheel", amount = 5, },
+        {type = "item", name = "electronic-circuit", amount = 5, },
+      },
+      results = {
+        {type = "item", name = "basic-robots-logistic-chest-requester", amount = 1, },
+      },
+      main_product = "basic-robots-logistic-chest-requester",
+    }}
+
+data:extend{
+  {
+    type = "technology",
+    name = "basic-robots-robotics-requester",
+    icon_size = 256, icon_mipmaps = 4,
+    icon = "__base__/graphics/technology/robotics.png",
+    prerequisites = {"basic-robots-robotics"},
+    unit =
+    {
+      count = 100,
+      ingredients =
+      {
+        {"automation-science-pack", 1}
+      },
+      time = 15
+    },
+    effects =
+    {
+      { type = "unlock-recipe", recipe = "basic-robots-logistic-chest-requester" }
+    },
+    order = "c-i"
+  }}
+
 -- Basic roboport
 if settings.startup["basic-robots-enable-roboport"].value then
   data.raw["roboport"]["roboport"].fast_replaceable_group = "roboport"
