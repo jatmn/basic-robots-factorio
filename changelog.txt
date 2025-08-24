@@ -2,7 +2,7 @@
 Version: 0.2.1
 Date: 24. 08. 2025
   Fixes:
-    - Accidently mad this mod require DLC - not sure how honestly?
+    - Accidently made this mod require DLC - not sure how honestly?
     - Fixed alot of locales issues
     - Fixed startup option of starting with personal roboport
     - Fixed non-functional personal equipment
