@@ -20,7 +20,7 @@ data:extend({
     {
         type = "bool-setting",
         name = "basic-robots-starter-equipment",
-        setting_type = "runtime-global",
+        setting_type = "startup",
         default_value = false
     }
 })
