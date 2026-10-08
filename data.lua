@@ -482,14 +482,14 @@ data:extend({
 		subgroup = "intermediate-product",
 		order = "e[electronic-circuit]",
 		stack_size = 50,
-		fuel_category = "basic-robots-single-use-battery",
+		fuel_categories = { "basic-robots-single-use-battery" },
 		fuel_value = "2MJ",
 	},
 	{
 		type = "recipe",
 		name = "basic-robots-single-use-battery",
 		energy_required = 20,
-		category = "advanced-crafting",
+		categories = { "advanced-crafting" },
 		ingredients = {
 			{ type = "item", name = "iron-plate", amount = 1 },
 			{ type = "item", name = "copper-plate", amount = 2 },
@@ -523,6 +523,7 @@ data:extend({
 			{ type = "unlock-recipe", recipe = "basic-robots-personal-roboport-equipment" },
 			{ type = "unlock-recipe", recipe = "basic-robots-battery-holder-equipment" },
 			{ type = "unlock-recipe", recipe = "basic-robots-single-use-battery" },
+			{ type = "unlock-logistic-network", modifier = true, hidden = true },
 			-- { type = "ghost-time-to-live", modifier = 60 * 60 * 60 * 24 * 7 }
 		},
 		order = "c-i",
