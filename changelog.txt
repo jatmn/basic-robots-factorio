@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 08. 10. 2026
+  Changes:
+    - Updated for Factorio 2.1, requiring version 2.1.21 or later.
+    - Updated single-use batteries to the new fuel categories and recipe categories APIs.
+    - Basic robotics now unlocks the logistics network controls introduced in Factorio 2.1.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 24. 08. 2025
   Fixes:

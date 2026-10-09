@@ -1,13 +1,13 @@
 {
   "name": "basic-robots-f2",
-  "title": "Basic Robots - Factorio 2.0",
-  "version": "0.2.1",
-  "date": "2025-08-24",
+  "title": "Basic Robots - Factorio 2.1",
+  "version": "0.3.0",
+  "date": "2026-10-08",
   "author": "William Newbery / JATMN",
   "homepage": "https://github.com/jatmn/basic-robots-factorio",
-  "dependencies": ["base >= 2.0.0",
+  "dependencies": ["base >= 2.1.21",
     "(?) Krastorio2 >= 1.0.0"
     ],
   "description": "Basic robots for early game",
-  "factorio_version": "2.0"
+  "factorio_version": "2.1"
 }
