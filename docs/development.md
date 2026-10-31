@@ -42,7 +42,7 @@ git diff --check
 git ls-files -z -- '*.lua' | xargs -0 -r -n1 luac5.2 -p --
 git ls-files -z -- '*.lua' | xargs -0 -r luacheck --
 git ls-files -z -- '*.lua' | xargs -0 -r stylua --check --config-path .stylua.toml --
-ruff check --config .ruff.toml tools
+git ls-files -z -- '*.py' | xargs -0 -r ruff check --config .ruff.toml --
 actionlint
 python3 tools/test_ci_changes.py
 python3 tools/test_package.py
