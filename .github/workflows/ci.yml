@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Check Python syntax
+        run: |
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in Path('tools').glob('*.py'):
+              ast.parse(path.read_text(), filename=str(path))
+          PY
+      - name: Test package and release contracts
+        run: |
+          python3 tools/test_package.py
+          python3 tools/test_prepare_release.py
+      - name: Build and validate the installable mod
+        run: |
+          python3 tools/package.py
+          python3 tools/validate_package.py
+      - name: Validate release proposal metadata and authored notes
+        if: startsWith(github.head_ref, 'release-please--')
+        run: |
+          version=$(jq -r '.version' info.json)
+          python3 tools/prepare_release.py --tag "v$version"
+      - name: Attach mod and checksum
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: basic-robots-f2-${{ github.sha }}
+          path: |
+            build/dist/*.zip
+            build/dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7
+
+  actionlint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate workflows with actionlint
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+        run: |
+          curl --fail --silent --show-error --location --retry 3 \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
+            -o "$RUNNER_TEMP/actionlint.tar.gz"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" |
+            sha256sum --check
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint"

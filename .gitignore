@@ -39,3 +39,7 @@ luac.out
 *.x86_64
 *.hex
 
+# Local release builds and Python caches
+/build/
+__pycache__/
+*.pyc
