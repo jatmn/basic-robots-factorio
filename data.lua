@@ -1,11 +1,11 @@
-local e, i, r
+local e, i
 local tint
 
 function remove_tech_effect(name, type)
   local tech = data.raw.technology[name]
-  for i, effect in ipairs(tech.effects) do
+  for index, effect in ipairs(tech.effects) do
     if effect.type == type then
-      table.remove(tech.effects, i)
+      table.remove(tech.effects, index)
       break
     end
   end

@@ -1,4 +1,4 @@
-local util = require("util")
+require("util")
 
 script.on_init(function()
   if settings.startup["basic-robots-starter-equipment"].value == true then
