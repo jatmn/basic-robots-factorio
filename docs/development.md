@@ -30,7 +30,7 @@ Release Please PRs also validate the proposed metadata and authored release note
 
 Tool versions: **Lua 5.2**, **Luacheck 1.2.0**, **StyLua 2.5.2**, **Ruff 0.17.3**,
 **actionlint 1.7.12**. Factorio stage globals are declared in `.luacheckrc`; Ruff
-enforces only its default correctness rules (syntax errors, undefined names, unused
+enforces only correctness rules, E9 + Pyflakes (syntax errors, undefined names, unused
 imports/variables), configured in `.ruff.toml`.
 
 ## Local commands
