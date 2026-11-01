@@ -1,7 +1,7 @@
 local e, i
 local tint
 
-function remove_tech_effect(name, type)
+local function remove_tech_effect(name, type)
   local tech = data.raw.technology[name]
   for index, effect in ipairs(tech.effects) do
     if effect.type == type then
@@ -64,8 +64,6 @@ data:extend({
       icon = "__base__/graphics/icons/construction-robot.png",
       tint = tint,
     } },
-    icon_size = 64,
-    icon_mipmaps = 4,
     subgroup = "logistic-network",
     order = "a[robot]-b[construction-robot]",
     place_result = "basic-robots-construction-robot",
@@ -109,8 +107,6 @@ if settings.startup["basic-robots-enable-logistics"].value then
         icon = "__base__/graphics/icons/logistic-robot.png",
         tint = tint,
       } },
-      icon_size = 64,
-      icon_mipmaps = 4,
       subgroup = "logistic-network",
       order = "a[robot]-a[logistic-robot]",
       place_result = "basic-robots-logistic-robot",
@@ -160,8 +156,6 @@ then
           tint = { 1, 0.5, 0.5 },
         },
       },
-      icon_size = 64,
-      icon_mipmaps = 4,
       subgroup = "logistic-network",
       order = "b[storage]-c[logistic-chest-passive-provider]",
       place_result = "basic-robots-logistic-chest-passive-provider",
@@ -207,8 +201,6 @@ then
           tint = { 1, 1, 0.25 },
         },
       },
-      icon_size = 64,
-      icon_mipmaps = 4,
       subgroup = "logistic-network",
       order = "b[storage]-c[logistic-chest-storage]",
       place_result = "basic-robots-logistic-chest-storage",
@@ -254,8 +246,6 @@ data:extend({
       icon = "__base__/graphics/icons/iron-chest.png",
       tint = { 0.5, 0.5, 1 },
     } },
-    icon_size = 64,
-    icon_mipmaps = 4,
     subgroup = "logistic-network",
     order = "b[storage]-c[logistic-chest-requester]",
     place_result = "basic-robots-logistic-chest-requester",
@@ -282,7 +272,6 @@ data:extend({
     type = "technology",
     name = "basic-robots-robotics-requester",
     icon_size = 256,
-    icon_mipmaps = 4,
     icon = "__base__/graphics/technology/robotics.png",
     prerequisites = { "basic-robots-robotics" },
     unit = {
@@ -342,8 +331,6 @@ if settings.startup["basic-robots-enable-roboport"].value then
           tint = { 0.6, 0.4, 0.1 },
         },
       },
-      icon_size = 64,
-      icon_mipmaps = 4,
       subgroup = "logistic-network",
       order = "c[signal]-a[roboport]",
       place_result = "basic-robots-roboport",
@@ -388,12 +375,9 @@ data:extend({
         tint = { 0.6, 0.4, 0.1 },
       },
     },
-    icon_size = 64,
-    icon_mipmaps = 4,
     place_as_equipment_result = "basic-robots-personal-roboport-equipment",
     subgroup = "utility-equipment",
     order = "e[robotics]-a[personal-roboport-equipment]",
-    default_request_amount = 1,
     stack_size = 20,
   },
   {
@@ -447,12 +431,9 @@ data:extend({
     type = "item",
     name = "basic-robots-battery-holder-equipment",
     icons = { { icon = "__base__/graphics/icons/battery-equipment.png", tint = { 0.7, 0.7, 0.7 } } },
-    icon_size = 64,
-    icon_mipmaps = 4,
     place_as_equipment_result = "basic-robots-battery-holder-equipment",
     subgroup = "equipment",
     order = "e[robotics]-a[personal-roboport-equipment]",
-    default_request_amount = 1,
     stack_size = 20,
   },
   {
@@ -477,8 +458,6 @@ data:extend({
     type = "item",
     name = "basic-robots-single-use-battery",
     icons = { { icon = "__base__/graphics/icons/battery.png", tint = { 0.7, 0.7, 0.7 } } },
-    icon_size = 64,
-    icon_mipmaps = 4,
     subgroup = "intermediate-product",
     order = "e[electronic-circuit]",
     stack_size = 50,
@@ -508,7 +487,6 @@ data:extend({
     type = "technology",
     name = "basic-robots-robotics",
     icon_size = 256,
-    icon_mipmaps = 4,
     icon = "__base__/graphics/technology/robotics.png",
     prerequisites = { "logistics" },
     unit = {
@@ -554,7 +532,10 @@ if settings.startup["basic-robots-enable-logistics"].value then
   remove_tech_effect("logistic-robotics", "character-logistic-requests")
   remove_tech_effect("logistic-robotics", "character-logistic-trash-slots")
 end
-if settings.startup["basic-robots-enable-logistics"].value and settings.startup["basic-robots-enable-roboport"] then
+-- Unlock the chests whenever they are created above.
+if
+  settings.startup["basic-robots-enable-roboport"].value or settings.startup["basic-robots-enable-logistics"].value
+then
   table.insert(
     data.raw.technology["basic-robots-robotics"].effects,
     { type = "unlock-recipe", recipe = "basic-robots-logistic-chest-passive-provider" }
@@ -586,16 +567,5 @@ data.raw.technology["worker-robots-storage-1"].unit = {
   time = 30,
 }
 data.raw.technology["worker-robots-storage-2"].prerequisites = { "worker-robots-storage-1", "robotics" }
-if mods["Krastorio2"] then
-  data.raw.technology["basic-robots-robotics"].prerequisites = { "basic-logistics" }
-  data.raw.recipe["basic-robots-construction-robot"].ingredients = {
-    { "automation-core", 5 },
-    { "electric-motor", 5 },
-    { "iron-plate", 10 },
-  }
-  data.raw.recipe["basic-robots-logistic-robot"].ingredients = {
-    { "automation-core", 5 },
-    { "electric-motor", 5 },
-    { "iron-plate", 10 },
-  }
-end
+-- Krastorio2 2.x converts electronic circuits in red-science unlocks to kr-automation-core
+-- during its data-updates stage; it has no basic-logistics, automation-core or electric-motor.
