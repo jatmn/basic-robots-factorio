@@ -5,6 +5,10 @@ Date: 08. 10. 2026
     - Updated for Factorio 2.1, requiring version 2.1.21 or later.
     - Updated single-use batteries to the new fuel categories and recipe categories APIs.
     - Basic robotics now unlocks the logistics network controls introduced in Factorio 2.1.
+  Bugfixes:
+    - Fixed loading with Krastorio2 2.x; its own recipe conversion now provides the automation core costs.
+    - Fixed the basic passive provider and storage chests never being unlocked when only the early roboport setting is enabled.
+    - Removed legacy prototype fields that Factorio 2.1 ignores.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 24. 08. 2025
