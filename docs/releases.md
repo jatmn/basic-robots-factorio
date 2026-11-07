@@ -58,9 +58,10 @@ This automation preserves the declared Factorio **2.1** target.
 Publishing to the [Mod Portal](https://mods.factorio.com/mod/basic-robots-f2) is
 optional. With no `FACTORIO_API_KEY` secret, the portal step notes that it is not
 connected and the GitHub release proceeds as before. To enable it, create an API key
-on your [Factorio profile](https://factorio.com/profile) with the **Upload Mods**
-permission and store it as the repository Actions secret `FACTORIO_API_KEY`. Merging
-a release PR then authorizes the portal upload too.
+on your [Factorio profile](https://factorio.com/profile) with the **Upload Mods** and
+**Edit Mods** permissions and store it as the repository Actions secret
+`FACTORIO_API_KEY`. Merging a release PR then authorizes the portal upload and page
+sync too.
 
 `tools/publish_mod.py` uploads the same validated ZIP that the GitHub release gets.
 It uses the API key only to request an upload URL, never sends the key to that URL,
@@ -68,16 +69,26 @@ and then verifies the portal's filename and SHA-1, reading the listing past the
 portal's 15-minute CDN cache. A portal version with identical bytes counts as
 already published; different bytes for that version, or a newer portal version,
 stop the release without uploading. The listing already exists (0.3.0 and earlier
-were uploaded manually); the uploader does not create a listing or change its
-licence, description or images.
+were uploaded manually); the uploader does not create a listing or change its licence.
 
-The portal upload runs before the GitHub release leaves draft. A portal failure
+After the upload, `tools/portal_page.py` brings the portal page in line with
+[`portal/`](../portal/README.md): the summary, the Markdown description and the
+screenshot gallery. It changes only what differs and sends nothing when the page is
+unchanged. Relative links in the description become GitHub URLs pinned to the release
+commit. It refuses a version older than the portal's newest release or one not uploaded
+yet. CI runs `tools/portal_page.py --check`. Preview a sync without a key:
+
+```sh
+cd tools && python3 portal_page.py --tag vX.Y.Z --dry-run
+```
+
+Both portal steps run before the GitHub release leaves draft. A portal failure
 therefore leaves the release unpublished, and the retry below resumes the portal
-upload and the GitHub publication together. Once a version is on the portal, do not
-abandon its draft with the procedure below: the portal will not accept different
-bytes for that version. Retry instead. The portal API is tested only with simulated
-responses (`tools/test_publish_mod.py`); the first real upload happens on the first
-release merged after the key is added.
+upload, the page sync and the GitHub publication together. Once a version is on the
+portal, do not abandon its draft with the procedure below: the portal will not accept
+different bytes for that version. Retry instead. The portal API is tested only with
+simulated responses (`tools/test_publish_mod.py`, `tools/test_portal_page.py`); the
+first real upload happens on the first release merged after the key is added.
 
 ## Release failures and recovery
 

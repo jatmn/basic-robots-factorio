@@ -45,3 +45,7 @@ jobs:
         run: python3 tools/test_prepare_release.py
       - name: Test Mod Portal publishing decisions
         run: python3 tools/test_publish_mod.py
+      - name: Check the Mod Portal page and its sync
+        run: |
+          python3 tools/portal_page.py --check
+          python3 tools/test_portal_page.py

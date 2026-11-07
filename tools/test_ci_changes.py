@@ -190,6 +190,7 @@ class RoutingTests(unittest.TestCase):
             (['info.json', 'locale/en/yuoki.cfg', 'graphics/new.png'], {'package'}),
             (['README.md', 'NOTICE', 'graphics/README.md'], {'package'}),
             (['docs/development.md', 'AGENTS.md', 'CONTRIBUTING.md'], set()),
+            (['portal/description.md', 'portal/gallery/01-thumbnail.png'], {'python'}),
             (['.gitignore', '.github/CODEOWNERS', 'build/generated.txt'], set()),
             (['.luacheckrc', '.stylua.toml'], {'lua'}),
             (['.github/workflows/lua.yml'], {'lua', 'python', 'workflows'}),

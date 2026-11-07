@@ -86,8 +86,9 @@ jobs:
           git merge-base --is-ancestor HEAD origin/main
           python3 tools/prepare_release.py --tag "$TAG"
 
-      # Upload before the GitHub release leaves draft, so a portal failure keeps the
-      # release unpublished and retry_tag resumes both. Same bytes on retry succeed.
+      # Upload and sync the page before the GitHub release leaves draft, so a portal
+      # failure keeps the release unpublished and retry_tag resumes everything.
+      # Same bytes on retry succeed; an unchanged page sends nothing.
       - name: Publish the same package to the Mod Portal when connected
         if: steps.draft.outputs.sha != ''
         env:
@@ -99,6 +100,17 @@ jobs:
             exit 0
           fi
           python3 tools/publish_mod.py --tag "$TAG"
+
+      - name: Bring the Mod Portal page in line with portal/ when connected
+        if: steps.draft.outputs.sha != ''
+        env:
+          FACTORIO_API_KEY: ${{ secrets.FACTORIO_API_KEY }}
+          TAG: ${{ steps.draft.outputs.tag }}
+        run: |
+          if [ -z "$FACTORIO_API_KEY" ]; then
+            exit 0
+          fi
+          python3 tools/portal_page.py --tag "$TAG"
 
       - name: Attach the installable mod and publish
         if: steps.draft.outputs.sha != ''

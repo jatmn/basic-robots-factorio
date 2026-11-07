@@ -45,7 +45,7 @@ def validate(output):
     # The release contract excludes developer files and hidden/generated content.
     expected = {
         file for file in tracked if file
-        and Path(file).parts[0] not in {'tests', 'tools', 'docs', 'AGENTS.md', 'CONTRIBUTING.md'}
+        and Path(file).parts[0] not in {'tests', 'tools', 'docs', 'portal', 'AGENTS.md', 'CONTRIBUTING.md'}
         and not any(part.startswith('.') or part in {'build', '__pycache__'} for part in Path(file).parts)
     }
     required = {

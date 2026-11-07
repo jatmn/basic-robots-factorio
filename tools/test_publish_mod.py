@@ -101,48 +101,57 @@ class PortalPublishTests(unittest.TestCase):
 
 class PortalWorkflowTests(unittest.TestCase):
     name = 'Publish the same package to the Mod Portal when connected'
+    page = 'Bring the Mod Portal page in line with portal/ when connected'
 
     def setUp(self):
-        workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/release-please.yml').read_text()
-        self.names = [line.split('- name: ', 1)[1] for line in workflow.splitlines()
+        self.workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/release-please.yml').read_text()
+        self.names = [line.split('- name: ', 1)[1] for line in self.workflow.splitlines()
                       if line.startswith('      - name: ')]
-        self.step = workflow.split('      - name: ' + self.name + '\n', 1)[1].split('\n      - ', 1)[0]
 
-    def test_portal_upload_precedes_github_publication_with_only_its_key(self):
-        self.assertEqual(self.names.index(self.name) + 1, self.names.index('Attach the installable mod and publish'))
-        self.assertEqual(self.names.index(self.name) - 1, self.names.index('Build and validate the release'))
-        env = self.step.split('        run:', 1)[0]
-        self.assertIn("if: steps.draft.outputs.sha != ''", env)
-        self.assertIn('FACTORIO_API_KEY: ${{ secrets.FACTORIO_API_KEY }}', env)
-        self.assertNotIn('GH_TOKEN', env)
-        self.assertNotIn('RELEASE_PLEASE_TOKEN', env)
+    def step(self, name):
+        return self.workflow.split('      - name: ' + name + '\n', 1)[1].split('\n      - ', 1)[0]
 
-    def test_missing_key_skips_and_present_key_runs_uploader(self):
-        script = textwrap.dedent(self.step.split('        run: |\n', 1)[1])
+    def test_portal_steps_precede_github_publication_with_only_their_key(self):
+        self.assertEqual(self.names[self.names.index('Build and validate the release') + 1:][:3],
+                         [self.name, self.page, 'Attach the installable mod and publish'])
+        for name in (self.name, self.page):
+            env = self.step(name).split('        run:', 1)[0]
+            self.assertIn("if: steps.draft.outputs.sha != ''", env)
+            self.assertIn('FACTORIO_API_KEY: ${{ secrets.FACTORIO_API_KEY }}', env)
+            self.assertNotIn('GH_TOKEN', env)
+            self.assertNotIn('RELEASE_PLEASE_TOKEN', env)
+
+    def run_step(self, name, key, workspace, exit_code=0):
+        script = textwrap.dedent(self.step(name).split('        run: |\n', 1)[1])
+        summary = workspace / 'summary'
+        summary.write_text('')
+        return subprocess.run(
+            ['bash', '-e', '-o', 'pipefail', '-c', script], capture_output=True, text=True,
+            env={**os.environ, 'PATH': str(workspace) + os.pathsep + os.environ['PATH'],
+                 'FACTORIO_API_KEY': key, 'TAG': 'v1.2.9', 'GITHUB_STEP_SUMMARY': str(summary),
+                 'PY_LOG': str(workspace / 'python-args'), 'PY_EXIT': str(exit_code)},
+        )
+
+    def test_missing_key_skips_and_present_key_runs_portal_tools(self):
         with tempfile.TemporaryDirectory() as directory:
             workspace = Path(directory)
             log = workspace / 'python-args'
             fake = workspace / 'python3'
             fake.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > "$PY_LOG"\nexit "$PY_EXIT"\n')
             fake.chmod(0o755)
-            for key, exit_code, expected in (('', 0, 0), ('fixture-key', 0, 0), ('fixture-key', 3, 3)):
-                with self.subTest(key=bool(key), exit_code=exit_code):
-                    log.unlink(missing_ok=True)
-                    summary = workspace / 'summary'
-                    summary.write_text('')
-                    result = subprocess.run(
-                        ['bash', '-e', '-o', 'pipefail', '-c', script], capture_output=True, text=True,
-                        env={**os.environ, 'PATH': str(workspace) + os.pathsep + os.environ['PATH'],
-                             'FACTORIO_API_KEY': key, 'TAG': 'v1.2.9', 'GITHUB_STEP_SUMMARY': str(summary),
-                             'PY_LOG': str(log), 'PY_EXIT': str(exit_code)},
-                    )
-                    self.assertEqual(result.returncode, expected, result.stderr)
-                    if key:
-                        self.assertEqual(log.read_text(), 'tools/publish_mod.py --tag v1.2.9\n')
-                        self.assertEqual(summary.read_text(), '')
-                    else:
-                        self.assertFalse(log.exists())
-                        self.assertIn('not connected', summary.read_text())
+            for name, tool in ((self.name, 'publish_mod.py'), (self.page, 'portal_page.py')):
+                for key, exit_code in (('', 0), ('fixture-key', 0), ('fixture-key', 3)):
+                    with self.subTest(step=name, key=bool(key), exit_code=exit_code):
+                        log.unlink(missing_ok=True)
+                        result = self.run_step(name, key, workspace, exit_code)
+                        self.assertEqual(result.returncode, exit_code if key else 0, result.stderr)
+                        summary = (workspace / 'summary').read_text()
+                        if key:
+                            self.assertEqual(log.read_text(), f'tools/{tool} --tag v1.2.9\n')
+                            self.assertEqual(summary, '')
+                        else:
+                            self.assertFalse(log.exists())
+                            self.assertEqual('not connected' in summary, tool == 'publish_mod.py')
 
 
 if __name__ == '__main__':

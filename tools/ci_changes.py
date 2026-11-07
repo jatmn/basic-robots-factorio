@@ -20,6 +20,8 @@ def classify(paths):
         if path in {'.github/release-please-config.json',
                     '.github/.release-please-manifest.json', '.github/version.txt'}:
             checks['python'] = True
+        if path.startswith('portal/'):
+            checks['python'] = True
         if path.startswith('.github/workflows/'):
             checks['workflows'] = True
             # Preserve the existing authorization gate on every workflow edit.
@@ -27,7 +29,7 @@ def classify(paths):
         if path in {'tools/pullfrog_command.py', 'tools/test_pullfrog_command.py'}:
             checks['workflows'] = True
         parts = PurePosixPath(path).parts
-        shipped = parts[0] not in {'tests', 'tools', 'docs', 'AGENTS.md', 'CONTRIBUTING.md'} and not any(
+        shipped = parts[0] not in {'tests', 'tools', 'docs', 'portal', 'AGENTS.md', 'CONTRIBUTING.md'} and not any(
             part.startswith('.') or part in {'build', '__pycache__'} for part in parts
         )
         if shipped or path in {

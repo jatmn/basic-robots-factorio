@@ -67,6 +67,11 @@ class PackageSourceTests(unittest.TestCase):
 
     def test_mod_package_round_trip(self):
         # Exercise this mod's actual entrypoints and existing notices.
+        # The Mod Portal page is tracked but never ships in the mod.
+        (self.root / 'portal/gallery').mkdir(parents=True)
+        (self.root / 'portal/summary.txt').write_text('Portal summary\n')
+        (self.root / 'portal/gallery/01.png').write_bytes(b'image')
+        self.git('add', 'portal')
         built = self.tool('package.py')
         self.assertEqual(built.returncode, 0, built.stderr)
         validated = self.tool('validate_package.py')
