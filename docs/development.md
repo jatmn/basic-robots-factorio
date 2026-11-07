@@ -18,8 +18,9 @@ reported under different names when they run or are skipped.
 | --- | --- |
 | Lua | Lua / Luacheck (Lua 5.2 syntax + Luacheck) and Lua / StyLua, plus packaging |
 | `.luacheckrc`, `.stylua.toml` or `lua.yml` | Both Lua checks on **every** tracked Lua file |
-| Python or `.ruff.toml` | Python AST syntax, Ruff lint and package/release/routing regressions |
+| Python or `.ruff.toml` | Python AST syntax, Ruff lint and Pullfrog/package/release/routing regressions |
 | Release Please config, manifest or version file | Python checks |
+| Pullfrog helper or its tests | Python checks and actionlint |
 | Metadata, locale, graphics, changelog and other shipped files | Packaging |
 | A workflow | actionlint, Python regressions and the affected validation workflow |
 | `ci.yml` or `tools/ci_changes.py` | Everything |
@@ -45,6 +46,7 @@ git ls-files -z -- '*.lua' | xargs -0 -r stylua --check --config-path .stylua.to
 git ls-files -z -- '*.py' | xargs -0 -r ruff check --config .ruff.toml --
 actionlint
 python3 tools/test_ci_changes.py
+python3 tools/test_pullfrog_command.py
 python3 tools/test_package.py
 python3 tools/test_prepare_release.py
 python3 tools/package.py
@@ -56,4 +58,5 @@ builds `build/dist/basic-robots-f2_<version>.zip` and `SHA256SUMS` from tracked 
 hidden files, `docs/` and `tools/` never ship. CI attaches the ZIP for seven days.
 
 These checks do not load Factorio. Validate gameplay changes in the game itself; see
-[releases](releases.md) for the release process.
+[releases](releases.md) for the release process. The separate [Pullfrog workflow](pullfrog.md)
+keeps its owner-command policy.

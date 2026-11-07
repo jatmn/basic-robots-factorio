@@ -39,6 +39,8 @@ jobs:
           git ls-files -z -- '*.py' | xargs -0 -r "$RUNNER_TEMP/ruff" check --no-cache --config .ruff.toml --
       - name: Test CI change routing
         run: python3 tools/test_ci_changes.py
+      - name: Test Pullfrog owner authorization
+        run: python3 tools/test_pullfrog_command.py
       - name: Test package source boundaries
         run: python3 tools/test_package.py
       - name: Test installable release and authored notes
