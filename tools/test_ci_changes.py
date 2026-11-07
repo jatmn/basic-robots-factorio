@@ -191,6 +191,7 @@ class RoutingTests(unittest.TestCase):
             (['README.md', 'NOTICE', 'graphics/README.md'], {'package'}),
             (['docs/development.md', 'AGENTS.md', 'CONTRIBUTING.md'], set()),
             (['portal/description.md', 'portal/gallery/01-thumbnail.png'], {'python'}),
+            (['tools/require_unchanged_draft.sh'], {'python'}),
             (['.gitignore', '.github/CODEOWNERS', 'build/generated.txt'], set()),
             (['.luacheckrc', '.stylua.toml'], {'lua'}),
             (['.github/workflows/lua.yml'], {'lua', 'python', 'workflows'}),

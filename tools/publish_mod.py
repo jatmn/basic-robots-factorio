@@ -72,11 +72,12 @@ def publish(output, tag, token):
     mod = listing(info['name'])
     if mod is None:
         raise ValueError('The portal listing does not exist; publish the first release manually')
+    # A newer portal version stops even an identical retry, as the page sync would.
+    if any(version_parts(item['version']) > version_parts(info['version']) for item in mod.get('releases', [])):
+        raise ValueError('A newer version is already published on the portal')
     if published(mod, info['version'], archive):
         print('The portal already has this exact package')
         return
-    if any(version_parts(item['version']) > version_parts(info['version']) for item in mod.get('releases', [])):
-        raise ValueError('A newer version is already published on the portal')
     initialized = request_json(PORTAL + '/api/v2/mods/releases/init_upload', {'mod': info['name']}, token=token)
     url = initialized.get('upload_url', '')
     parsed = urllib.parse.urlparse(url)

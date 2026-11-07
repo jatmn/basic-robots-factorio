@@ -20,7 +20,7 @@ def classify(paths):
         if path in {'.github/release-please-config.json',
                     '.github/.release-please-manifest.json', '.github/version.txt'}:
             checks['python'] = True
-        if path.startswith('portal/'):
+        if path.startswith('portal/') or path == 'tools/require_unchanged_draft.sh':
             checks['python'] = True
         if path.startswith('.github/workflows/'):
             checks['workflows'] = True

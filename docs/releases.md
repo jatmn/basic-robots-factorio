@@ -67,8 +67,10 @@ sync too.
 It uses the API key only to request an upload URL, never sends the key to that URL,
 and then verifies the portal's filename and SHA-1, reading the listing past the
 portal's 15-minute CDN cache. A portal version with identical bytes counts as
-already published; different bytes for that version, or a newer portal version,
-stop the release without uploading. The listing already exists (0.3.0 and earlier
+already published, unless the portal also has a newer version; different bytes for
+that version, or any newer portal version, stop the release without uploading. A
+version reaching the portal outside this workflow therefore leaves an older draft
+unpublished; check the portal and finish that GitHub release by hand. The listing already exists (0.3.0 and earlier
 were uploaded manually); the uploader does not create a listing or change its licence.
 
 After the upload, `tools/portal_page.py` brings the portal page in line with
@@ -114,8 +116,9 @@ lock. Within either admission group, a newer pending run can still replace an
 older pending run; this is not a durable queue of every manual request.
 
 Do not manually publish or edit the release while its workflow is running.
-The workflow rechecks the draft status, tag and exact build commit before
-uploading assets and again before publishing, stopping if they changed.
+The workflow rechecks the draft status, tag and exact build commit
+(`tools/require_unchanged_draft.sh`) before the Mod Portal steps, before uploading
+GitHub assets and again before publishing, stopping if they changed.
 An existing Git tag must also resolve to that commit, including annotated tags.
 A missing tag is normal for a draft; GitHub creates it on publication.
 These checks do not lock GitHub's release UI or make the check and write atomic;

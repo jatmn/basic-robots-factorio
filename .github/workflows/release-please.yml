@@ -86,6 +86,16 @@ jobs:
           git merge-base --is-ancestor HEAD origin/main
           python3 tools/prepare_release.py --tag "$TAG"
 
+      # The Mod Portal cannot take back a version, so check the draft and any tag
+      # before it gets the package, as well as around each GitHub write below.
+      - name: Require the unchanged draft before writing to the Mod Portal
+        if: steps.draft.outputs.sha != ''
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          TAG: ${{ steps.draft.outputs.tag }}
+          RELEASE_SHA: ${{ steps.draft.outputs.sha }}
+        run: bash tools/require_unchanged_draft.sh
+
       # Upload and sync the page before the GitHub release leaves draft, so a portal
       # failure keeps the release unpublished and retry_tag resumes everything.
       # Same bytes on retry succeed; an unchanged page sends nothing.
@@ -119,21 +129,9 @@ jobs:
           TAG: ${{ steps.draft.outputs.tag }}
           RELEASE_SHA: ${{ steps.draft.outputs.sha }}
         run: |
-          require_unchanged_draft() {
-            gh release view "$TAG" --json isDraft,targetCommitish,tagName > "$RUNNER_TEMP/release.json"
-            jq -e --arg tag "$TAG" --arg sha "$RELEASE_SHA" \
-              '.isDraft == true and .tagName == $tag and .targetCommitish == $sha' "$RUNNER_TEMP/release.json"
-            gh api "repos/$GH_REPO/git/matching-refs/tags/$TAG" > "$RUNNER_TEMP/tag-refs.json"
-            tag_ref=$(jq -r --arg ref "refs/tags/$TAG" \
-              '.[] | select(.ref == $ref) | .ref' "$RUNNER_TEMP/tag-refs.json")
-            if [ -n "$tag_ref" ]; then
-              tag_sha=$(gh api "repos/$GH_REPO/commits/$tag_ref" --jq .sha)
-              [[ "$tag_sha" == "$RELEASE_SHA" ]]
-            fi
-          }
-          require_unchanged_draft
+          bash tools/require_unchanged_draft.sh
           gh release upload "$TAG" build/dist/*.zip build/dist/SHA256SUMS --clobber
-          require_unchanged_draft
+          bash tools/require_unchanged_draft.sh
           gh release edit "$TAG" --notes-file build/dist/release-notes.md --draft=false
 
       # Run after publication so the next PR sees the newly published version.

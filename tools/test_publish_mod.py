@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Exercise Mod Portal publishing decisions on a real built ZIP, with the portal simulated."""
 import hashlib
+import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -61,6 +63,12 @@ class PortalPublishTests(unittest.TestCase):
             with patch.object(publish_mod, 'listing', return_value=self.portal(version='1.3.0')), \
                     self.assertRaisesRegex(ValueError, 'newer version'):
                 self.publish()
+            # An identical package on the portal does not excuse a newer version beside it.
+            both = self.portal()
+            both['releases'].append({'version': '1.3.0', 'file_name': 'basic-robots-f2_1.3.0.zip', 'sha1': 'new'})
+            with patch.object(publish_mod, 'listing', return_value=both), \
+                    self.assertRaisesRegex(ValueError, 'newer version'):
+                self.publish()
             request.assert_not_called()
 
     def test_invalid_inputs_and_portal_failures_stop(self):
@@ -100,6 +108,7 @@ class PortalPublishTests(unittest.TestCase):
 
 
 class PortalWorkflowTests(unittest.TestCase):
+    guard = 'Require the unchanged draft before writing to the Mod Portal'
     name = 'Publish the same package to the Mod Portal when connected'
     page = 'Bring the Mod Portal page in line with portal/ when connected'
 
@@ -112,8 +121,12 @@ class PortalWorkflowTests(unittest.TestCase):
         return self.workflow.split('      - name: ' + name + '\n', 1)[1].split('\n      - ', 1)[0]
 
     def test_portal_steps_precede_github_publication_with_only_their_key(self):
-        self.assertEqual(self.names[self.names.index('Build and validate the release') + 1:][:3],
-                         [self.name, self.page, 'Attach the installable mod and publish'])
+        self.assertEqual(self.names[self.names.index('Build and validate the release') + 1:][:4],
+                         [self.guard, self.name, self.page, 'Attach the installable mod and publish'])
+        guard = self.step(self.guard)
+        self.assertIn("if: steps.draft.outputs.sha != ''", guard)
+        self.assertIn('RELEASE_SHA: ${{ steps.draft.outputs.sha }}', guard)
+        self.assertNotIn('FACTORIO_API_KEY', guard)
         for name in (self.name, self.page):
             env = self.step(name).split('        run:', 1)[0]
             self.assertIn("if: steps.draft.outputs.sha != ''", env)
@@ -131,6 +144,43 @@ class PortalWorkflowTests(unittest.TestCase):
                  'FACTORIO_API_KEY': key, 'TAG': 'v1.2.9', 'GITHUB_STEP_SUMMARY': str(summary),
                  'PY_LOG': str(workspace / 'python-args'), 'PY_EXIT': str(exit_code)},
         )
+
+    def test_guard_step_stops_on_a_changed_draft_or_moved_tag(self):
+        # The shared guard's full state matrix runs through the Attach step in
+        # test_prepare_release.py; this checks the pre-portal step runs that same guard.
+        sha = 'a' * 40
+        draft = {'isDraft': True, 'tagName': 'v1.2.9', 'targetCommitish': sha}
+        moved = [{'ref': 'refs/tags/v1.2.9'}]
+        cases = ((draft, [], sha, 0), (draft, [{'ref': 'refs/tags/v1.2.90'}], sha, 0), (draft, moved, sha, 0),
+                 (draft, moved, 'b' * 40, 1), ({**draft, 'isDraft': False}, [], sha, 1),
+                 ({**draft, 'targetCommitish': 'b' * 40}, [], sha, 1))
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / 'gh').write_text(f'#!{sys.executable}\n' + textwrap.dedent('''\
+                import os, sys
+                args = sys.argv[1:]
+                replies = {
+                    ('release', 'view', 'v1.2.9', '--json', 'isDraft,targetCommitish,tagName'): 'DRAFT',
+                    ('api', 'repos/fixture/fixture/git/matching-refs/tags/v1.2.9'): 'REFS',
+                    ('api', 'repos/fixture/fixture/commits/refs/tags/v1.2.9', '--jq', '.sha'): 'TAG_SHA',
+                }
+                if tuple(args) not in replies:
+                    sys.exit('Unexpected gh request: ' + repr(args))
+                print(os.environ[replies[tuple(args)]])
+                '''))
+            (workspace / 'gh').chmod(0o755)
+            script = self.step(self.guard).split('        run: ', 1)[1].strip()
+            for state, refs, tag_sha, expected in cases:
+                with self.subTest(state=state, refs=refs, tag_sha=tag_sha):
+                    result = subprocess.run(
+                        ['bash', '-e', '-c', script], cwd=root, capture_output=True, text=True,
+                        env={**os.environ, 'PATH': str(workspace) + os.pathsep + os.environ['PATH'],
+                             'TAG': 'v1.2.9', 'RELEASE_SHA': sha, 'GH_REPO': 'fixture/fixture',
+                             'RUNNER_TEMP': directory, 'DRAFT': json.dumps(state),
+                             'REFS': json.dumps(refs), 'TAG_SHA': tag_sha},
+                    )
+                    self.assertEqual(result.returncode, expected, result.stderr)
 
     def test_missing_key_skips_and_present_key_runs_portal_tools(self):
         with tempfile.TemporaryDirectory() as directory:
