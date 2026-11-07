@@ -5,12 +5,13 @@ Continue merging normal changes and adding player-facing entries to
 `changelog.txt` while that PR is open. No release is published until you mark
 the release PR ready and merge it.
 
-## First release: 0.3.0
+## First release: 0.3.1
 
 The empty manifest means Release Please has not published this repository yet.
-The first proposed version is fixed at 0.3.0, matching the current
-author-maintained changelog and metadata, even if more features arrive before
-release. The bootstrap boundary is
+The first proposed version is fixed at 0.3.1, matching the current
+author-maintained changelog, even if more features arrive before release.
+0.3.0 was uploaded to the Mod Portal manually before this automation existed,
+so the first automated release starts after it. The bootstrap boundary is
 [831ec03a1b281eee73332ef575d94c1a714f8347](https://github.com/jatmn/basic-robots-factorio/commit/831ec03a1b281eee73332ef575d94c1a714f8347),
 the last default-branch commit at version 0.2.1 before the current
 version's changes. Earlier history is excluded. The PR summary includes only
@@ -43,7 +44,7 @@ author-written section of `changelog.txt`.
    Older changelog sections remain inside the mod but are absent from that
    GitHub release's notes.
 
-Download the release asset **`basic-robots-f2_0.3.0.zip`** (or the corresponding later
+Download the release asset **`basic-robots-f2_0.3.1.zip`** (or the corresponding later
 version) and copy it unchanged into Factorio's mods directory. GitHub's automatic
 **Source code** archives are not the installable asset. For a source checkout,
 use the unversioned folder **basic-robots-f2**. See [info.json](../info.json) for the
@@ -54,7 +55,8 @@ This automation preserves the declared Factorio **2.1** target.
 ## Release failures and recovery
 
 This process publishes GitHub releases, not Mod Portal releases. The first version
-is the current authored version; no existing Mod Portal release is overwritten.
+(0.3.1) follows the manually uploaded Mod Portal 0.3.0, so it does not reuse a
+published version.
 
 The workflow trusts code merged into `main`, including the release tooling.
 Credentials are scoped to API steps, and checkout does not persist them.
@@ -62,7 +64,7 @@ Steps share a runner; these scopes do not sandbox malicious merged code.
 
 Build/upload failures leave the release unpublished. Fix transient problems,
 then run **Release Please** manually on **main**, with `retry_tag` set to the
-existing draft tag (for example `v0.3.0`). This rebuilds its recorded commit,
+existing draft tag (for example `v0.3.1`). This rebuilds its recorded commit,
 replaces incomplete assets and publishes only after validation. An already
 published release is rejected. Normal runs pause while a versioned release
 draft remains unpublished, so they cannot propose another release using that
@@ -88,7 +90,7 @@ If the recorded commit cannot build or validate, a retry cannot repair it.
 Use this maintainer-controlled recovery to propose a corrected release.
 Its version is recalculated from all changes since the last published release;
 new feature or breaking changes can increase it beyond the failed version.
-The first automated release remains 0.3.0 because of `initial-version`.
+The first automated release remains 0.3.1 because of `initial-version`.
 Do not use this procedure for a release that was published.
 Wait for any active Release Please run to finish and do not dispatch retries
 during recovery.
@@ -97,7 +99,7 @@ during recovery.
    example, inspect the draft with:
 
    ```sh
-   gh release view v0.3.0 --repo jatmn/basic-robots-factorio \
+   gh release view v0.3.1 --repo jatmn/basic-robots-factorio \
      --json isDraft,targetCommitish,tagName
    ```
 
@@ -110,9 +112,9 @@ during recovery.
    leftover pending label prevents it from recreating the abandoned release.
 3. Open a normal corrective PR against `main`, containing the source fix and
    restoring `.github/.release-please-manifest.json` to the last **actually
-   published** release. For a failed first 0.3.0 release with nothing published,
-   replace the file with `{}`. If 0.3.0 was published and 0.3.1 failed, replace
-   it with `{".": "0.3.0"}`. Determine that previous version from the published
+   published** release. For a failed first 0.3.1 release with nothing published,
+   replace the file with `{}`. If 0.3.1 was published and 0.3.2 failed, replace
+   it with `{".": "0.3.1"}`. Determine that previous version from the published
    GitHub release and its tag, not from the advanced manifest or `info.json`.
    Leave `info.json`, `.github/version.txt` and the newest authored changelog
    section at the failed version for now; step 5 reconciles the new proposal.
@@ -124,18 +126,18 @@ during recovery.
    a failed draft normally has no Git tag:
 
    ```sh
-   gh release delete v0.3.0 --repo jatmn/basic-robots-factorio
+   gh release delete v0.3.1 --repo jatmn/basic-robots-factorio
    ```
 
    If a tag with that exact name exists, first verify that it resolves to the
-   recorded failed SHA with `gh api repos/jatmn/basic-robots-factorio/commits/v0.3.0 --jq .sha`.
+   recorded failed SHA with `gh api repos/jatmn/basic-robots-factorio/commits/v0.3.1 --jq .sha`.
    Only when it matches, add `--cleanup-tag` to the delete command above to
    remove both. An unexpected tag target requires investigation, not deletion.
 5. Run **Release Please** manually on **main** with `retry_tag` **blank**.
    The retired PR's labels prevent replay; the restored manifest makes Release
    Please propose a new draft PR from the previous published boundary, or the
    original bootstrap boundary for the first release. Inspect the replacement
-   PR's calculated version. For example, after published 0.3.0 and failed 0.3.1,
+   PR's calculated version. For example, after published 0.3.1 and failed 0.3.2,
    a new `feat:` can make the replacement 0.4.0. Before merging, update the
    newest authored changelog section to that final proposed version and include
    all unreleased changes. Verify that the PR's manifest, `info.json`, version
@@ -154,7 +156,7 @@ contains the proposed version:
 
 ```sh
 python3 tools/test_prepare_release.py
-python3 tools/prepare_release.py --tag v0.3.0
+python3 tools/prepare_release.py --tag v0.3.1
 ```
 
 The `tools/package.py` / `tools/validate_package.py` commands

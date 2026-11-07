@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 07. 11. 2026
+  Changes:
+    - Cleaned up code style formatting. No gameplay changes.
+    - Release ZIPs are now built and validated automatically.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.0
 Date: 08. 10. 2026
   Changes:
