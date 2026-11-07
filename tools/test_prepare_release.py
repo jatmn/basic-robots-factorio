@@ -137,7 +137,7 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual(set(config['packages']), {'.'})
         package = config['packages']['.']
         self.assertEqual(package['release-type'], 'simple')
-        self.assertEqual(package['initial-version'], '0.3.0')
+        self.assertEqual(package['initial-version'], '0.3.1')
         self.assertIs(package['include-component-in-tag'], False)
         self.assertIs(package['skip-changelog'], True)
         self.assertEqual(package['version-file'], '.github/version.txt')
