@@ -143,6 +143,18 @@ class PortalPageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'stable tag'):
             portal_page.sync('main', 'fixture-key', root=self.root, ref=REF)
 
+    def test_sync_needs_the_checkout_of_the_tagged_release(self):
+        # An older checkout must not overwrite the page of the release the portal serves.
+        self.write('info.json', json.dumps({'name': 'basic-robots-f2', 'version': '0.3.0'}))
+        listing = self.listing(summary='Newer summary')
+        with patch.object(portal_page, 'full_listing', return_value=listing) as full, \
+                patch.object(portal_page, 'request_json') as request:
+            with self.assertRaisesRegex(ValueError, r'v0\.3\.1 does not match info\.json \(0\.3\.0\)'):
+                portal_page.sync('v0.3.1', 'fixture-key', root=self.root, ref=REF)
+            full.assert_not_called()
+            portal_page.sync('v0.3.1', None, dry_run=True, root=self.root, ref=REF)
+            request.assert_not_called()
+
     def test_full_listing_reads_past_the_cdn_cache(self):
         with patch.object(portal_page, 'request_json', return_value={}) as request:
             portal_page.full_listing('basic-robots-f2')

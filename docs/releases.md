@@ -77,8 +77,8 @@ After the upload, `tools/portal_page.py` brings the portal page in line with
 [`portal/`](../portal/README.md): the summary, the Markdown description and the
 screenshot gallery. It changes only what differs and sends nothing when the page is
 unchanged. Relative links in the description become GitHub URLs pinned to the release
-commit. It refuses a version older than the portal's newest release or one not uploaded
-yet. CI runs `tools/portal_page.py --check`. Preview a sync without a key:
+commit. It refuses a tag that does not match the checkout's `info.json`, a version
+older than the portal's newest release, or one not uploaded yet. CI runs `tools/portal_page.py --check`. Preview a sync without a key:
 
 ```sh
 cd tools && python3 portal_page.py --tag vX.Y.Z --dry-run

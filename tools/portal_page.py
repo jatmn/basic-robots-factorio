@@ -147,6 +147,10 @@ def sync(tag, token, dry_run=False, root=ROOT, ref=None):
     if not TAG.fullmatch(tag or ''):
         raise ValueError('Expected a stable tag such as v0.3.1')
     info = json.loads((root / 'info.json').read_text(encoding='utf-8'))
+    # The guards below identify the release by the tag, but the page comes from this checkout:
+    # a real sync needs both to be the same release. A dry run may preview another version.
+    if not dry_run and info.get('version') != tag[1:]:
+        raise ValueError(f'{tag} does not match info.json ({info.get("version")}); sync from that release\'s checkout')
     page = render(ref or git(root, 'rev-parse', 'HEAD').decode().strip(), root)
     mod = full_listing(info['name'])
     if mod is None:
