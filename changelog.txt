@@ -9,6 +9,8 @@ Date: 08. 10. 2026
     - Fixed loading with Krastorio2 2.x; its own recipe conversion now provides the automation core costs.
     - Fixed the basic passive provider and storage chests never being unlocked when only the early roboport setting is enabled.
     - Removed legacy prototype fields that Factorio 2.1 ignores.
+  Features:
+    - Added basic active provider and buffer chests, unlocked by Basic robotics requester research. Each has a startup setting to disable it; both are enabled by default.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 24. 08. 2025
