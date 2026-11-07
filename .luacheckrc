@@ -11,8 +11,6 @@ exclude_files = {"build/**", ".cache/**"}
 
 files["data*.lua"].globals = {"data"}
 files["data*.lua"].read_globals = {"mods", "util"}
--- Existing global helper kept for compatibility: data-stage globals are shared across mods.
-files["data.lua"].globals = {"data", "remove_tech_effect"}
 files["settings*.lua"].globals = {"data"}
 files["settings*.lua"].read_globals = {"mods"}
 files["control.lua"].globals = {"game", "storage"}
