@@ -47,6 +47,7 @@ actionlint
 python3 tools/test_ci_changes.py
 python3 tools/test_package.py
 python3 tools/test_prepare_release.py
+python3 tools/test_publish_mod.py
 python3 tools/package.py
 python3 tools/validate_package.py
 ```

@@ -43,3 +43,5 @@ jobs:
         run: python3 tools/test_package.py
       - name: Test installable release and authored notes
         run: python3 tools/test_prepare_release.py
+      - name: Test Mod Portal publishing decisions
+        run: python3 tools/test_publish_mod.py

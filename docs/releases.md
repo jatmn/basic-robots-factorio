@@ -40,7 +40,8 @@ author-written section of `changelog.txt`.
    Keep Release Please's branch, title/body structure and autorelease labels.
 4. The workflow creates an unpublished GitHub draft, checks out the exact
    release merge commit, requires tag/manifest/metadata/changelog agreement,
-   builds and validates the ZIP, uploads it with `SHA256SUMS`, and publishes.
+   builds and validates the ZIP, uploads that ZIP to the Factorio Mod Portal when
+   connected (see below), uploads it with `SHA256SUMS`, and publishes.
    Older changelog sections remain inside the mod but are absent from that
    GitHub release's notes.
 
@@ -52,17 +53,42 @@ current mod version, Factorio series and dependency constraints. Install require
 dependencies separately; this ZIP does not bundle other mods.
 This automation preserves the declared Factorio **2.1** target.
 
+## Factorio Mod Portal publishing
+
+Publishing to the [Mod Portal](https://mods.factorio.com/mod/basic-robots-f2) is
+optional. With no `FACTORIO_API_KEY` secret, the portal step notes that it is not
+connected and the GitHub release proceeds as before. To enable it, create an API key
+on your [Factorio profile](https://factorio.com/profile) with the **Upload Mods**
+permission and store it as the repository Actions secret `FACTORIO_API_KEY`. Merging
+a release PR then authorizes the portal upload too.
+
+`tools/publish_mod.py` uploads the same validated ZIP that the GitHub release gets.
+It uses the API key only to request an upload URL, never sends the key to that URL,
+and then verifies the portal's filename and SHA-1, reading the listing past the
+portal's 15-minute CDN cache. A portal version with identical bytes counts as
+already published; different bytes for that version, or a newer portal version,
+stop the release without uploading. The listing already exists (0.3.0 and earlier
+were uploaded manually); the uploader does not create a listing or change its
+licence, description or images.
+
+The portal upload runs before the GitHub release leaves draft. A portal failure
+therefore leaves the release unpublished, and the retry below resumes the portal
+upload and the GitHub publication together. Once a version is on the portal, do not
+abandon its draft with the procedure below: the portal will not accept different
+bytes for that version. Retry instead. The portal API is tested only with simulated
+responses (`tools/test_publish_mod.py`); the first real upload happens on the first
+release merged after the key is added.
+
 ## Release failures and recovery
 
-This process publishes GitHub releases, not Mod Portal releases. The first version
-(0.3.1) follows the manually uploaded Mod Portal 0.3.0, so it does not reuse a
-published version.
+The first version (0.3.1) follows the manually uploaded Mod Portal 0.3.0, so it does
+not reuse a published version.
 
 The workflow trusts code merged into `main`, including the release tooling.
 Credentials are scoped to API steps, and checkout does not persist them.
 Steps share a runner; these scopes do not sandbox malicious merged code.
 
-Build/upload failures leave the release unpublished. Fix transient problems,
+Build, portal and upload failures leave the release unpublished. Fix transient problems,
 then run **Release Please** manually on **main**, with `retry_tag` set to the
 existing draft tag (for example `v0.3.1`). This rebuilds its recorded commit,
 replaces incomplete assets and publishes only after validation. An already
@@ -181,4 +207,4 @@ build development ZIPs without requiring a merged release manifest.
 
 ZIP validation checks tracked membership, exact source bytes, required notices,
 CRC and checksum. It does not replace Factorio engine, save or graphics testing
-for gameplay changes. This workflow publishes GitHub assets, not Mod Portal uploads.
+for gameplay changes.
