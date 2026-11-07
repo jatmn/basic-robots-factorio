@@ -5,6 +5,8 @@ Date: 08. 10. 2026
     - Updated for Factorio 2.1, requiring version 2.1.21 or later.
     - Updated single-use batteries to the new fuel categories and recipe categories APIs.
     - Basic robotics now unlocks the logistics network controls introduced in Factorio 2.1.
+  Features:
+    - Added basic active provider and buffer chests, unlocked by Basic robotics requester research. Each has a startup setting to disable it; both are enabled by default.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 24. 08. 2025

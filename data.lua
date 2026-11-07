@@ -299,6 +299,102 @@ data:extend({
   },
 })
 
+-- Optional active provider and buffer chests, unlocked with the requester chest as in vanilla logistic system
+if settings.startup["basic-robots-enable-active-provider-chest"].value then
+  e = table.deepcopy(data.raw["container"]["iron-chest"])
+  e.type = "logistic-container"
+  e.name = "basic-robots-logistic-chest-active-provider"
+  e.icons = { { icon = e.icon, tint = { 0.8, 0.4, 1 } } }
+  e.icon = nil
+  e.minable.result = e.name
+  e.logistic_mode = "active-provider"
+  e.next_upgrade = "active-provider-chest"
+  e.inventory_size = 16
+  e.picture.layers[1].tint = { 0.8, 0.4, 1 }
+
+  data:extend({
+    e,
+    {
+      type = "item",
+      name = "basic-robots-logistic-chest-active-provider",
+      icons = { {
+        icon = "__base__/graphics/icons/iron-chest.png",
+        tint = { 0.8, 0.4, 1 },
+      } },
+      subgroup = "logistic-network",
+      order = "b[storage]-c[logistic-chest-active-provider]",
+      place_result = "basic-robots-logistic-chest-active-provider",
+      stack_size = 50,
+    },
+    {
+      type = "recipe",
+      name = "basic-robots-logistic-chest-active-provider",
+      enabled = false,
+      ingredients = {
+        { type = "item", name = "iron-chest", amount = 1 },
+        { type = "item", name = "iron-gear-wheel", amount = 5 },
+        { type = "item", name = "electronic-circuit", amount = 5 },
+      },
+      results = {
+        { type = "item", name = "basic-robots-logistic-chest-active-provider", amount = 1 },
+      },
+      main_product = "basic-robots-logistic-chest-active-provider",
+    },
+  })
+  table.insert(
+    data.raw.technology["basic-robots-robotics-requester"].effects,
+    { type = "unlock-recipe", recipe = "basic-robots-logistic-chest-active-provider" }
+  )
+end
+
+if settings.startup["basic-robots-enable-buffer-chest"].value then
+  e = table.deepcopy(data.raw["container"]["iron-chest"])
+  e.type = "logistic-container"
+  e.name = "basic-robots-logistic-chest-buffer"
+  e.icons = { { icon = e.icon, tint = { 0.5, 1, 0.5 } } }
+  e.icon = nil
+  e.minable.result = e.name
+  e.logistic_mode = "buffer"
+  e.next_upgrade = "buffer-chest"
+  e.inventory_size = 16
+  e.trash_inventory_size = 5
+  e.picture.layers[1].tint = { 0.5, 1, 0.5 }
+
+  data:extend({
+    e,
+    {
+      type = "item",
+      name = "basic-robots-logistic-chest-buffer",
+      icons = { {
+        icon = "__base__/graphics/icons/iron-chest.png",
+        tint = { 0.5, 1, 0.5 },
+      } },
+      subgroup = "logistic-network",
+      order = "b[storage]-c[logistic-chest-buffer]",
+      place_result = "basic-robots-logistic-chest-buffer",
+      stack_size = 50,
+    },
+    {
+      type = "recipe",
+      name = "basic-robots-logistic-chest-buffer",
+      enabled = false,
+      ingredients = {
+        { type = "item", name = "iron-chest", amount = 1 },
+        { type = "item", name = "iron-gear-wheel", amount = 5 },
+        { type = "item", name = "electronic-circuit", amount = 5 },
+      },
+      results = {
+        { type = "item", name = "basic-robots-logistic-chest-buffer", amount = 1 },
+      },
+      main_product = "basic-robots-logistic-chest-buffer",
+    },
+  })
+  table.insert(
+    data.raw.technology["basic-robots-robotics-requester"].effects,
+    { type = "unlock-recipe", recipe = "basic-robots-logistic-chest-buffer" }
+  )
+end
+
 -- Basic roboport
 if settings.startup["basic-robots-enable-roboport"].value then
   data.raw["roboport"]["roboport"].fast_replaceable_group = "roboport"
