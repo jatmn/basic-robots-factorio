@@ -22,7 +22,7 @@ validation in its actionlint job; these validation jobs never launch the agent.
 
 ## Maintenance and checks
 
-The action bootstrap is pinned to Pullfrog v0.1.111; its npm runtime accepts
+The action bootstrap is pinned to Pullfrog v0.1.122; its npm runtime accepts
 compatible 0.1.x updates. Keep `PULLFROG_VERSION` in the helper aligned with the
 bootstrap (`tools/test_pullfrog_command.py` fails if they differ) and verify the
 upstream payload contract when updating it. Large commands use the original
