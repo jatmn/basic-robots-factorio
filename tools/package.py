@@ -35,7 +35,7 @@ def pack(output):
     with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as package:
         for file in sorted(filter(None, tracked)):
             relative = Path(file)
-            if relative.parts[0] in {'tests', 'tools', 'docs', 'AGENTS.md', 'CONTRIBUTING.md'}:
+            if relative.parts[0] in {'tests', 'tools', 'docs', 'portal', 'AGENTS.md', 'CONTRIBUTING.md'}:
                 continue
             if any(part.startswith('.') or part in {'build', '__pycache__'} for part in relative.parts):
                 continue

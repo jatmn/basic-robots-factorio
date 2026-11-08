@@ -24,6 +24,7 @@ reported under different names when they run or are skipped.
 | Metadata, locale, graphics, changelog and other shipped files | Packaging |
 | A workflow | actionlint, Python regressions and the affected validation workflow |
 | `ci.yml` or `tools/ci_changes.py` | Everything |
+| `portal/` (Mod Portal page) | Python checks, including `portal_page.py --check` |
 | `docs/` | Change detection only |
 
 PRs check the Lua files they add or modify; pushes to `main` check all tracked Lua files.
@@ -49,13 +50,16 @@ python3 tools/test_ci_changes.py
 python3 tools/test_pullfrog_command.py
 python3 tools/test_package.py
 python3 tools/test_prepare_release.py
+python3 tools/test_publish_mod.py
+python3 tools/test_portal_page.py
+(cd tools && python3 portal_page.py --check)
 python3 tools/package.py
 python3 tools/validate_package.py
 ```
 
 Format a Lua file with `stylua --config-path .stylua.toml <file>`. `tools/package.py`
 builds `build/dist/basic-robots-f2_<version>.zip` and `SHA256SUMS` from tracked release sources;
-hidden files, `docs/` and `tools/` never ship. CI attaches the ZIP for seven days.
+hidden files, `docs/`, `portal/` and `tools/` never ship. CI attaches the ZIP for seven days.
 
 These checks do not load Factorio. Validate gameplay changes in the game itself; see
 [releases](releases.md) for the release process. The separate [Pullfrog workflow](pullfrog.md)

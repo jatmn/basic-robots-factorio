@@ -18,7 +18,8 @@ class ReleaseTests(unittest.TestCase):
 
     def setUp(self):
         PackageSourceTests.setUp(self)
-        shutil.copy(Path(__file__).with_name('prepare_release.py'), self.root / 'tools')
+        for name in ('prepare_release.py', 'require_unchanged_draft.sh'):
+            shutil.copy(Path(__file__).with_name(name), self.root / 'tools')
         info = json.loads((self.root / 'info.json').read_text())
         info.update(version='1.3.1', factorio_version='2.1', dependencies=['base >= 2.1.21', '(?) Krastorio2 >= 1.0.0'])
         (self.root / 'info.json').write_text(json.dumps(info))
@@ -206,6 +207,7 @@ class ReleaseTests(unittest.TestCase):
             self.assertNotIn('github.token', scope)
         for name in ('Require unfinished publication to be resumed first',
                      'Locate the unpublished release commit',
+                     'Require the unchanged draft before writing to the Mod Portal',
                      'Attach the installable mod and publish'):
             self.assertIn('          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}',
                           self.workflow_step(name).split('        run:', 1)[0])
