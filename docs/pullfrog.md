@@ -1,6 +1,6 @@
-# Pullfrog owner commands
+# Pullfrog owner commands and reviews
 
-Pullfrog runs only after **jatmn** creates a new top-level issue or PR comment
+For manual commands, **jatmn** creates a new top-level issue or PR comment
 whose first line begins with `@pullfrog` and a visible instruction:
 
 ```text
@@ -15,10 +15,19 @@ verifies the repository, event and original comment before the agent receives
 credentials. The verified owner role lets commands manage contributor-created
 issues and PRs too.
 
-Opening a PR or marking it ready for review must not launch Pullfrog. Its agent
-workflow has no PR, push, schedule or `workflow_dispatch` trigger. The separate
-**CI** dispatcher runs authorization tests in its Python job and workflow
+The **CI** dispatcher runs authorization tests in its Python job and workflow
 validation in its actionlint job; these validation jobs never launch the agent.
+
+## Automatic reviews
+
+Pullfrog reviews new PRs, drafts, and updated diffs in this public repository
+when GitHub identifies `jatmn` as the PR author. The person pushing an update
+can be a different account. The GitHub App dispatches the workflow on the
+default branch and the author check must pass before the agent starts.
+In Pullfrog settings, enable PR reviews, draft reviews, and re-reviews on new
+commits, and disable managed mentions and external-contributor reviews.
+Use a fresh owner-authored draft and push an update after the workflow is
+merged to verify live automatic dispatch.
 
 ## Maintenance and checks
 
